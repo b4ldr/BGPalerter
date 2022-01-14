@@ -1,0 +1,27 @@
+#!/usr/bin/make -f
+export DH_VERBOSE = 1
+%:
+	dh $@ --with nodejs
+
+override_dh_auto_build:
+	babeljs index.js -d "${CURDIR}/build"
+	babeljs src -d "${CURDIR}/build/src"
+	cp package.json "${CURDIR}/build/"
+	cd "${CURDIR}/build" && npm pack
+
+override_dh_auto_test:
+	/bin/true
+
+override_dh_auto_install:
+	npm install --prefix "${CURDIR}/debian/node-bgpalerter/usr" -g ${CURDIR}/build/bgpalerter-*.tgz
+	find "${CURDIR}/debian/node-bgpalerter/usr/lib/node_modules/bgpalerter/node_modules" \
+		-name .npmignore -name .eslintrc -name \*.md -name LICENSE -name LICENSE-jsbn -name package.json \
+		-name .gitmodules -name .gitattributes -delete
+
+override_dh_auto_link:
+	# We dont want to link the vendored packages
+	find "${CURDIR}/debian/node-bgpalerter/usr/lib/node_modules/bgpalerter/node_modules" \
+		-name examples -name .bin -name bin -type d -delete
+
+override_dh_auto_clean:
+	rm -rf "${CURDIR}/build"
