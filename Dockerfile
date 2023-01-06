@@ -1,5 +1,5 @@
 # -- trivial container for BGPalerter
-FROM node:14-alpine as build
+FROM node:19-alpine as build
 
 WORKDIR /opt/bgpalerter
 COPY . .
